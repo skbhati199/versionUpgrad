@@ -1,0 +1,17 @@
+name: "version-upgrad"
+description: "Makes sure that git tag and version in package.json match"
+runs:
+  using: "node12"
+  main: "dist/index.js"
+branding:
+  icon: "tag"
+  color: "blue"
+inputs:
+  TAG_PREFIX:
+    description: "Tag prefix used in git (eg. v)"
+    required: false
+outputs:
+  PACKAGE_VERSION:
+    description: "Version of the package (in package.json)"
+  TAG_VERSION:
+    description: "Version of the package in git"

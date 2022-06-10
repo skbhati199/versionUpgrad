@@ -1,0 +1,52 @@
+name: Node.js CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [12.x, 14.x]
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: npm ci
+      - run: npm run type-check
+      - run: npm test
+
+  test-generated-files: # make sure dist is generated properly
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: "12"
+      - run: npm ci
+      - run: npm run publish
+      - run: git diff --exit-code
+
+  test-e2e: # make sure the action works on a clean machine without building
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: "12"
+      - run: npm ci
+      - run: npm run publish-e2e
+      - run: |
+          echo "{\"version\": \"0.0.0\"}" > package.json
+          mv action-e2e.yml action.yml
+      - uses: ./
+        with:
+          GITHUB_REF: refs/tags/0.0.0
