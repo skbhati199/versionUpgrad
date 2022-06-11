@@ -1947,6 +1947,57 @@ exports.debug = debug; // for test
 
 /***/ }),
 
+/***/ 699:
+/***/ ((__unused_webpack_module, __webpack_exports__, __nccwpck_require__) => {
+
+"use strict";
+// ESM COMPAT FLAG
+__nccwpck_require__.r(__webpack_exports__);
+
+// EXTERNAL MODULE: ./node_modules/@actions/core/lib/core.js
+var core = __nccwpck_require__(186);
+// EXTERNAL MODULE: external "fs"
+var external_fs_ = __nccwpck_require__(147);
+;// CONCATENATED MODULE: ./src/version-upgrad.ts
+
+
+/* harmony default export */ const version_upgrad = ((gitRef, prefix = "") => {
+    const rawPackageJson = external_fs_.readFileSync("package.json", "utf8");
+    const packageJson = JSON.parse(rawPackageJson);
+    const refsTags = "refs/tags/";
+    if (!gitRef.startsWith(refsTags)) {
+        throw new Error("Current commit is not tagged in git");
+    }
+    const { version } = packageJson;
+    if (!prefix.startsWith(refsTags)) {
+        prefix = `${refsTags}${prefix}`;
+    }
+    const prefixedVersion = `${prefix}${version}`;
+    if (gitRef !== prefixedVersion) {
+        throw new Error(`Git tag (${gitRef}) does not match package.json version (${prefixedVersion})`);
+    }
+    core.info(`Git tag (${gitRef}) matches package.json version (${prefixedVersion})`);
+    core.setOutput("PACKAGE_VERSION", version);
+    core.setOutput("TAG_VERSION", gitRef.substring(refsTags.length));
+});
+
+;// CONCATENATED MODULE: ./src/index.ts
+
+
+try {
+    const prefix = process.env.INPUT_TAG_PREFIX
+        ? process.env.INPUT_TAG_PREFIX
+        : process.env.TAG_PREFIX;
+    version_upgrad(process.env.GITHUB_REF || "", prefix);
+}
+catch (error) {
+    core.error(error.message);
+    process.exit(1);
+}
+
+
+/***/ }),
+
 /***/ 491:
 /***/ ((module) => {
 
@@ -2077,52 +2128,10 @@ module.exports = require("util");
 /******/ 	
 /************************************************************************/
 var __webpack_exports__ = {};
-// This entry need to be wrapped in an IIFE because it need to be in strict mode.
+// This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
 (() => {
-"use strict";
-// ESM COMPAT FLAG
-__nccwpck_require__.r(__webpack_exports__);
-
-// EXTERNAL MODULE: ./node_modules/@actions/core/lib/core.js
-var core = __nccwpck_require__(186);
-// EXTERNAL MODULE: external "fs"
-var external_fs_ = __nccwpck_require__(147);
-;// CONCATENATED MODULE: ./src/version-upgrad.ts
-
-
-/* harmony default export */ const version_upgrad = ((gitRef, prefix = "") => {
-    const rawPackageJson = external_fs_.readFileSync("package.json", "utf8");
-    const packageJson = JSON.parse(rawPackageJson);
-    const refsTags = "refs/tags/";
-    if (!gitRef.startsWith(refsTags)) {
-        throw new Error("Current commit is not tagged in git");
-    }
-    const { version } = packageJson;
-    if (!prefix.startsWith(refsTags)) {
-        prefix = `${refsTags}${prefix}`;
-    }
-    const prefixedVersion = `${prefix}${version}`;
-    if (gitRef !== prefixedVersion) {
-        throw new Error(`Git tag (${gitRef}) does not match package.json version (${prefixedVersion})`);
-    }
-    core.info(`Git tag (${gitRef}) matches package.json version (${prefixedVersion})`);
-    core.setOutput("PACKAGE_VERSION", version);
-    core.setOutput("TAG_VERSION", gitRef.substring(refsTags.length));
-});
-
-;// CONCATENATED MODULE: ./src/index.ts
-
-
-try {
-    const prefix = process.env.INPUT_TAG_PREFIX
-        ? process.env.INPUT_TAG_PREFIX
-        : process.env.TAG_PREFIX;
-    version_upgrad(process.env.GITHUB_REF || "", prefix);
-}
-catch (error) {
-    core.error(error.message);
-    process.exit(1);
-}
+process.env.GITHUB_REF = process.env.INPUT_GITHUB_REF;
+__nccwpck_require__(699);
 
 })();
 
